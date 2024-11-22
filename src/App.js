@@ -1,25 +1,54 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from "react";
+import Header from "./components/Header";
+import Movie from "./components/Movie";
+import "./App.css";
 
-function App() {
+const App = () => {
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const API_KEY = "1bb111e1";
+
+  const fetchMovies = async (query = "spider") => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `https://www.omdbapi.com/?s=${query}&apikey=${API_KEY}`
+      );
+      const data = await response.json();
+      if (data.Search) {
+        setMovies(data.Search);
+      } else {
+        setMovies([]);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchMovies();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container">
+      <Header title="Movies Mixture" onSearch={fetchMovies} />
+      <div class="mt-4">
+        <h3 className="text-light">Nonton film apa hari ini!</h3>
+      </div>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="row">
+          {movies.map((movie) => (
+            <Movie key={movie.imdbID} movie={movie} />
+          ))}
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default App;
